@@ -1,35 +1,43 @@
 package br.com.ucsal.olimpiadas.menu.itensMenu;
 
 import br.com.ucsal.olimpiadas.domain.entity.Questao;
-import br.com.ucsal.olimpiadas.domain.repository.ProvaRepository;
-import br.com.ucsal.olimpiadas.domain.repository.QuestaoRepository;
-import br.com.ucsal.olimpiadas.ui.Console;
+import br.com.ucsal.olimpiadas.domain.repository.IRepository.IProvaRepository;
+import br.com.ucsal.olimpiadas.domain.repository.IRepository.IQuestaoRepository;
+import br.com.ucsal.olimpiadas.service.QuestaoService;
+import br.com.ucsal.olimpiadas.ui.UiConsole;
 
 import java.util.Scanner;
 
 public class CadastrarQuestaoItem implements ItemMenu {
     private final String descricao = "Cadastrar questão (A–E) em uma prova\"";
 
-    private final QuestaoRepository questaoRepository;
-    private final ProvaRepository provaRepository;
-    private final Console console;
+    private final IQuestaoRepository questaoRepository;
+    private final IProvaRepository provaRepository;
+    private final UiConsole uiConsole;
     private final Scanner in;
 
+    private final QuestaoService questaoService = new QuestaoService();
 
-    public CadastrarQuestaoItem(QuestaoRepository questaoRepository, ProvaRepository provaRepository, Console console, Scanner in) {
+    public CadastrarQuestaoItem(IQuestaoRepository questaoRepository, IProvaRepository provaRepository, UiConsole uiConsole, Scanner in) {
         this.questaoRepository = questaoRepository;
         this.provaRepository = provaRepository;
-        this.console = console;
+        this.uiConsole = uiConsole;
         this.in = in;
     }
 
-    private void cadastrarQuestao() {
+    @Override
+    public String getDescricao() {
+        return descricao;
+    }
+
+    @Override
+    public void action() {
         if (provaRepository.isEmpty()) {
             System.out.println("não há provas cadastradas");
             return;
         }
 
-        var provaId = console.escolherProva();
+        var provaId = uiConsole.escolherProva();
         if (provaId == null)
             return;
 
@@ -52,25 +60,8 @@ public class CadastrarQuestaoItem implements ItemMenu {
             return;
         }
 
-        var q = new Questao();
-        q.setId(questaoRepository.proximaQuestao() + 1);
-        q.setProvaId(provaId);
-        q.setEnunciado(enunciado);
-        q.setAlternativas(alternativas);
-        q.setAlternativaCorreta(correta);
-
-        questaoRepository.salvarQuestao(q);
+        Questao q = questaoService.cadastrarQuestao(questaoRepository, provaId, enunciado, alternativas, correta);
 
         System.out.println("Questão cadastrada: " + q.getId() + " (na prova " + provaId + ")");
-    }
-
-    @Override
-    public String getDescricao() {
-        return descricao;
-    }
-
-    @Override
-    public void action() {
-        this.cadastrarQuestao();
     }
 }

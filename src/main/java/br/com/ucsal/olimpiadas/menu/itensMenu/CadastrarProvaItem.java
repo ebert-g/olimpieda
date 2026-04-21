@@ -1,17 +1,19 @@
 package br.com.ucsal.olimpiadas.menu.itensMenu;
 
-import br.com.ucsal.olimpiadas.domain.entity.Prova;
-import br.com.ucsal.olimpiadas.domain.repository.ProvaRepository;
+import br.com.ucsal.olimpiadas.domain.repository.IRepository.IProvaRepository;
+import br.com.ucsal.olimpiadas.service.ProvaService;
 
 import java.util.Scanner;
 
 public class CadastrarProvaItem implements ItemMenu {
     private final String descricao = "Cadastrar prova";
-    private final ProvaRepository provaRepository;
+
+    private final IProvaRepository provaRepository;
     private final Scanner in;
 
+    ProvaService provaService = new ProvaService();
 
-    public CadastrarProvaItem(ProvaRepository provaRepository, Scanner in) {
+    public CadastrarProvaItem(IProvaRepository provaRepository, Scanner in) {
         this.provaRepository = provaRepository;
         this.in = in;
     }
@@ -23,10 +25,6 @@ public class CadastrarProvaItem implements ItemMenu {
 
     @Override
     public void action() {
-        this.cadastrarProva();
-    }
-
-    private void cadastrarProva() {
         System.out.print("Título da prova: ");
         var titulo = in.nextLine();
 
@@ -34,12 +32,6 @@ public class CadastrarProvaItem implements ItemMenu {
             System.out.println("título inválido");
             return;
         }
-
-        var prova = new Prova();
-        prova.setId(provaRepository.proximaProva() + 1);
-        prova.setTitulo(titulo);
-
-        provaRepository.salvarProva(prova);
-        System.out.println("Prova criada: " + prova.getId());
+        provaService.cadastrarProva(provaRepository, titulo);
     }
 }
